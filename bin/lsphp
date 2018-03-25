@@ -1,0 +1,45 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+error_reporting(-1);
+
+foreach ([__DIR__ . '/../../autoload.php', __DIR__ . '/../vendor/autoload.php', __DIR__ . '/vendor/autoload.php'] as $file) {
+    if (file_exists($file)) {
+        define('PHPUNIT_COMPOSER_INSTALL', $file);
+        break;
+    }
+}
+if (defined('PHPUNIT_COMPOSER_INSTALL')) {
+    require PHPUNIT_COMPOSER_INSTALL;
+} else {
+    exit(1);
+}
+
+use Psr\Log\LogLevel;
+use SimpleLogger\File;
+use SimpleLogger\Logger;
+$fileLog = new File('server.log');
+$fileLog->setLevel(LogLevel::INFO);
+$log = new Logger();
+$log->setLogger($fileLog);
+$log->error('test');
+
+set_error_handler(function($a, $b, $c, $d) {
+    throw new \ErrorException($b, 0, $a, $c, $d);
+}, -1);
+set_exception_handler(function ($e) use ($log) {
+    $log->error('err');
+    $log->error((string) $e);
+});
+register_shutdown_function(function() use ($log) {
+    $error = error_get_last();
+    if (!$error) {
+        $log->info('Exited with no error');
+        return;
+    }
+    $log->error(json_encode($error));
+});
+
+
+$server = new Firehed\LSPHP\Server($log);
+$server->start();
