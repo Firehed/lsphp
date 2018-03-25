@@ -178,7 +178,7 @@ class Server implements ResponseHandler
 
         $data = json_decode($jsonBody, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            $this->log->error("Invalid JSON response");
+            $this->log->error('Invalid JSON: {json}', ['json' => $jsonBody]);
             return null;
         }
 
