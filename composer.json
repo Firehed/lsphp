@@ -18,6 +18,7 @@
       "bin/lsphp"
     ],
     "require": {
+        "php": "^7.1",
         "psr/log": "^1.0",
         "fguillot/simplelogger": "^1.0"
     },
