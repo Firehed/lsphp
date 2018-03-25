@@ -10,9 +10,8 @@ class Notification implements Message
     use MessageTrait {
         MessageTrait::__toString as defaultToString;
     }
+    use ParamsTrait;
 
-    private $method;
-    private $params;
 
     public function __construct(string $method, $params = null)
     {
@@ -26,11 +25,6 @@ class Notification implements Message
             'method' => $this->method,
             'params' => $this->params,
         ];
-    }
-
-    public function getMethod(): string
-    {
-        return $this->method;
     }
 
     public function __toString()
@@ -56,5 +50,20 @@ class Notification implements Message
             $jsonData['method'],
             $jsonData['params'] ?? null
         );
+    }
+
+    public function isNotification(): bool
+    {
+        return true;
+    }
+
+    public function isRequest(): bool
+    {
+        return false;
+    }
+
+    public function isResponse(): bool
+    {
+        return false;
     }
 }

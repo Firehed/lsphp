@@ -34,10 +34,24 @@ class Server implements ResponseHandler
     /** @var string */
     private $root;
 
+    /** @var Plugin\PluginInterface[] */
+    private $plugins = [];
+
     public function __construct(LoggerInterface $log)
     {
         $this->log = $log;
         $this->messageFactory = new MessageFactory($log);
+    }
+
+    public function addPlugin(Plugins\PluginInterface $plugin)
+    {
+        $this->log->info('Registered plugin "{name}"', [
+            'name' => $plugin->getName(),
+        ]);
+        // TODO: turn this into some sort of composed logger that prefixes the
+        // plugin name to the message
+        $plugin->setLogger($this->log);
+        $this->plugins[] = $plugin;
     }
 
     public function start()
@@ -85,13 +99,29 @@ class Server implements ResponseHandler
             write response; error Message\ErrorCode::SERVER_NOT_INITIALZED`-32002`
             drop notification if not exit`
         */
-        switch ($message->getMethod()) {
-            case RequestType::INITIALIZE:
-                $this->initialize($message);
-                break;
-            default:
-                $this->log->error(sprintf('Unhandled message type "%s"', $message->getMethod()));
-                break;
+        if ($message->getMethod() === RequestType::INITIALIZE) {
+            $this->initialize($message);
+            return;
+        }
+        $this->dispatchMessageToPlugins($message);
+    }
+
+    private function dispatchMessageToPlugins(Message $message): void
+    {
+        // At some point, this should work asynchronously. Suffice to say,
+        // doing so is non-trivial.
+        $this->log->debug('Dispatching {message}', ['message' => print_r($message, true)]);
+        // This will also need to replace the handler with some sort of
+        // aggergator - right now each plugin will battle with each other for
+        // a given file and potentially overwite each other's notifications.
+        if ($message->isNotification()) {
+            foreach ($this->plugins as $plugin) {
+                $plugin->handleNotification($message, $this);
+            }
+        } elseif ($message->isRequest()) {
+            foreach ($this->plugins as $plugin) {
+                $plugin->handleRequest($message, $this);
+            }
         }
     }
 
@@ -156,6 +186,11 @@ class Server implements ResponseHandler
     }
 
     public function writeResponse(Response $response): void
+    {
+        $this->writeMessage($response);
+    }
+
+    public function writeMessage(Message $response): void
     {
         $message = $response->format();
         $this->log->debug('>>> ' . $message);

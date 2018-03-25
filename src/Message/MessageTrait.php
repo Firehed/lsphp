@@ -8,6 +8,9 @@ trait MessageTrait
     private static $EOL = "\r\n";
     private $jsonrpc = '2.0';
 
+    /** @var string */
+    private $method;
+
     abstract protected function getBody();
 
     public function format(): string
@@ -30,6 +33,11 @@ trait MessageTrait
             self::$EOL,
             $json
         );
+    }
+
+    public function getMethod(): string
+    {
+        return $this->method;
     }
 
     public function __toString()

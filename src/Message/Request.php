@@ -6,10 +6,9 @@ namespace Firehed\LSPHP\Message;
 class Request implements Message
 {
     use MessageTrait;
+    use ParamsTrait;
 
     private $id;
-    private $method;
-    private $params;
 
     public function __construct($id, string $method, $params = null)
     {
@@ -43,19 +42,24 @@ class Request implements Message
         );
     }
 
-    public function getMethod(): string
-    {
-        return $this->method;
-    }
-
     /** @return string | int */
     public function getId()
     {
         return $this->id;
     }
 
-    public function getParams()
+    public function isNotification(): bool
     {
-        return $this->params;
+        return false;
+    }
+
+    public function isRequest(): bool
+    {
+        return true;
+    }
+
+    public function isResponse(): bool
+    {
+        return false;
     }
 }

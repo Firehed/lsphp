@@ -16,6 +16,10 @@ class Response implements Message
         $this->id = $request->getId();
         $this->result = $result;
         $this->error = $error; // TODO: make this sensible
+
+        // Responses never have a method, but this simplifies a lot of other
+        // logic.
+        $this->method = '';
     }
 
     protected function getBody()
@@ -30,5 +34,20 @@ class Response implements Message
     public function getResult()
     {
         return $this->result;
+    }
+
+    public function isNotification(): bool
+    {
+        return false;
+    }
+
+    public function isRequest(): bool
+    {
+        return false;
+    }
+
+    public function isResponse(): bool
+    {
+        return true;
     }
 }

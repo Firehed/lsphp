@@ -18,9 +18,8 @@ Generally speaking, you will need to register `vendor/bin/lsphp` as a binary to 
 
 ## Compatible tools
 
-None yet
+* `php -l`
 
 ### Coming Soon
 
-* `php -l`
 * PHP_CodeSniffer
