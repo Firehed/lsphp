@@ -18,13 +18,11 @@ if (defined('PHPUNIT_COMPOSER_INSTALL')) {
 use Psr\Log\LogLevel;
 
 if (function_exists('posix_isatty') && posix_isatty(STDOUT)) {
-    $baseLog = new SimpleLogger\Stdout();
+    $log = new Firehed\SimpleLogger\Stdout();
 } else {
-    $baseLog = new SimpleLogger\File('server.log');
+    $log = new Firehed\SimpleLogger\File('server.log');
 }
-$baseLog->setLevel(LogLevel::INFO);
-$log = new SimpleLogger\Logger();
-$log->setLogger($baseLog);
+$log->setLevel(LogLevel::INFO);
 $log->error('test');
 
 set_error_handler(function($a, $b, $c, $d) {
